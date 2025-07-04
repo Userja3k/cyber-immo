@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages et Support{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-envelope"></i> Messages et Support
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Actions -->
+    <div class="cyber-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: 'Orbitron', monospace; color: var(--primary-neon); margin: 0;">
+                <i class="fas fa-inbox"></i> Centre de Messages
+            </h3>
+            <button class="cyber-btn" onclick="openComposeModal()">
+                <i class="fas fa-plus"></i> Nouveau Message
+            </button>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <!-- Messages reçus -->
+        <div class="cyber-card">
+            <h4 style="color: var(--primary-neon); margin-bottom: 1.5rem;">
+                <i class="fas fa-inbox"></i> Messages Reçus
+            </h4>
+            
+            {% if messages %}
+                <div style="display: grid; gap: 1rem;">
+                    {% for message in messages %}
+                    <div class="cyber-card" style="margin: 0; padding: 1rem; cursor: pointer;" onclick="openMessage({{ message.id }})">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <strong style="color: var(--primary-neon);">{{ message.from_email }}</strong>
+                            <small style="color: var(--text-secondary);">{{ message.sent_at|date:"d/m/Y H:i" }}</small>
+                        </div>
+                        <div style="margin-bottom: 0.5rem; font-weight: 600;">{{ message.subject }}</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                            {{ message.body|truncatechars:100 }}
+                        </div>
+                        {% if not message.is_read %}
+                            <div style="width: 8px; height: 8px; background: var(--accent-neon); border-radius: 50%; position: absolute; top: 1rem; right: 1rem;"></div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-secondary);">Aucun message reçu</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Signaler un problème -->
+        <div class="cyber-card">
+            <h4 style="color: var(--secondary-neon); margin-bottom: 1.5rem;">
+                <i class="fas fa-exclamation-triangle"></i> Signaler un Problème
+            </h4>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Titre du problème</label>
+                    <input type="text" class="cyber-input" name="titre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description détaillée</label>
+                    <textarea class="cyber-input" name="description" rows="6" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Votre email</label>
+                    <input type="email" class="cyber-input" name="email" value="{{ user.email }}" required>
+                </div>
+                
+                <button type="submit" class="cyber-btn" style="width: 100%;">
+                    <i class="fas fa-paper-plane"></i> Envoyer le Rapport
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de lecture de message -->
+<div id="messageModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 600px; background: var(--bg-card); border-radius: 15px; padding: 2rem;">
+        <div id="messageContent">
+            <!-- Le contenu sera chargé dynamiquement -->
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="cyber-btn" onclick="replyToMessage()" style="flex: 1;">
+                <i class="fas fa-reply"></i> Répondre
+            </button>
+            <button class="cyber-btn" onclick="closeMessageModal()" style="background: var(--text-secondary); flex: 1;">
+                <i class="fas fa-times"></i> Fermer
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de composition -->
+<div id="composeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 600px; background: var(--bg-card); border-radius: 15px; padding: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; color: var(--primary-neon);">
+            <i class="fas fa-edit"></i> Nouveau Message
+        </h3>
+        
+        <form id="composeForm">
+            <div class="form-group">
+                <label class="form-label">Destinataire</label>
+                <input type="email" class="cyber-input" name="to_email" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Objet</label>
+                <input type="text" class="cyber-input" name="subject" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea class="cyber-input" name="body" rows="8" required></textarea>
+            </div>
+        </form>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="cyber-btn" onclick="sendMessage()" style="flex: 1;">
+                <i class="fas fa-paper-plane"></i> Envoyer
+            </button>
+            <button class="cyber-btn" onclick="closeComposeModal()" style="background: var(--text-secondary); flex: 1;">
+                <i class="fas fa-times"></i> Annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentMessageId = null;
+
+function openMessage(messageId) {
+    currentMessageId = messageId;
+    // Ici, vous chargeriez le contenu du message via AJAX
+    document.getElementById('messageContent').innerHTML = `
+        <h4 style="color: var(--primary-neon); margin-bottom: 1rem;">Message #${messageId}</h4>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">Chargement du contenu...</p>
+    `;
+    document.getElementById('messageModal').style.display = 'block';
+}
+
+function closeMessageModal() {
+    document.getElementById('messageModal').style.display = 'none';
+    currentMessageId = null;
+}
+
+function replyToMessage() {
+    if (currentMessageId) {
+        closeMessageModal();
+        openComposeModal();
+        // Pré-remplir le formulaire de réponse
+    }
+}
+
+function openComposeModal() {
+    document.getElementById('composeModal').style.display = 'block';
+}
+
+function closeComposeModal() {
+    document.getElementById('composeModal').style.display = 'none';
+    document.getElementById('composeForm').reset();
+}
+
+function sendMessage() {
+    const form = document.getElementById('composeForm');
+    const formData = new FormData(form);
+    
+    // Ici, vous enverriez le message via AJAX
+    alert('Message envoyé !');
+    closeComposeModal();
+}
+</script>
+{% endblock %}

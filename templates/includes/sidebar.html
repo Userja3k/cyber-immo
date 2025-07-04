@@ -1,0 +1,59 @@
+{% load static %}
+
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <h1><i class="fas fa-building"></i> CYBER IMMO</h1>
+        <p class="text-secondary">{{ user.get_role_display }}</p>
+    </div>
+    
+    <ul class="sidebar-nav">
+        {% if user.role == 'manager' or user.role == 'admin' %}
+            <li><a href="{% url 'manager:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a></li>
+            <li><a href="{% url 'manager:proprietes' %}" class="{% if 'proprietes' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-home"></i> Propriétés
+            </a></li>
+            <li><a href="{% url 'manager:ventes' %}" class="{% if 'ventes' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-handshake"></i> Ventes
+            </a></li>
+            <li><a href="{% url 'manager:statistiques' %}" class="{% if request.resolver_match.url_name == 'statistiques' %}active{% endif %}">
+                <i class="fas fa-chart-bar"></i> Statistiques
+            </a></li>
+            <li><a href="{% url 'manager:utilisateurs' %}" class="{% if request.resolver_match.url_name == 'utilisateurs' %}active{% endif %}">
+                <i class="fas fa-users"></i> Utilisateurs
+            </a></li>
+            <li><a href="{% url 'manager:feed' %}" class="{% if request.resolver_match.url_name == 'feed' %}active{% endif %}">
+                <i class="fas fa-envelope"></i> Messages
+            </a></li>
+            <li><a href="{% url 'manager:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                <i class="fas fa-cog"></i> Paramètres
+            </a></li>
+        {% elif user.role == 'photo_updater' %}
+            <li><a href="{% url 'updater:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a></li>
+            <li><a href="{% url 'updater:proprietes' %}" class="{% if 'proprietes' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-home"></i> Propriétés
+            </a></li>
+            <li><a href="{% url 'updater:add_propriete' %}" class="{% if request.resolver_match.url_name == 'add_propriete' %}active{% endif %}">
+                <i class="fas fa-plus"></i> Ajouter Propriété
+            </a></li>
+            <li><a href="{% url 'updater:carte' %}" class="{% if request.resolver_match.url_name == 'carte' %}active{% endif %}">
+                <i class="fas fa-map"></i> Carte
+            </a></li>
+            <li><a href="{% url 'updater:feed' %}" class="{% if request.resolver_match.url_name == 'feed' %}active{% endif %}">
+                <i class="fas fa-envelope"></i> Messages
+            </a></li>
+            <li><a href="{% url 'updater:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                <i class="fas fa-cog"></i> Paramètres
+            </a></li>
+        {% endif %}
+    </ul>
+    
+    <div style="position: absolute; bottom: 2rem; left: 2rem; right: 2rem;">
+        <a href="{% url 'auth:logout' %}" class="cyber-btn" style="width: 100%; text-align: center; display: block; text-decoration: none;">
+            <i class="fas fa-sign-out-alt"></i> Déconnexion
+        </a>
+    </div>
+</div>

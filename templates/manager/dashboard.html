@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Manager{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-tachometer-alt"></i> Dashboard Manager
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_proprietes }}</div>
+            <div class="stat-label">Propriétés</div>
+            <i class="fas fa-home" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; color: var(--primary-neon); opacity: 0.3;"></i>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ total_ventes }}</div>
+            <div class="stat-label">Ventes</div>
+            <i class="fas fa-handshake" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; color: var(--secondary-neon); opacity: 0.3;"></i>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ total_revenus|floatformat:0 }}€</div>
+            <div class="stat-label">Revenus Total</div>
+            <i class="fas fa-euro-sign" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; color: var(--warning-neon); opacity: 0.3;"></i>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ proprietes_par_statut|length }}</div>
+            <div class="stat-label">Statuts Actifs</div>
+            <i class="fas fa-tags" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; color: var(--accent-neon); opacity: 0.3;"></i>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <a href="{% url 'manager:add_propriete' %}" class="cyber-btn" style="text-decoration: none; text-align: center; padding: 1rem;">
+            <i class="fas fa-plus"></i> Ajouter Propriété
+        </a>
+        <a href="{% url 'manager:add_vente' %}" class="cyber-btn" style="text-decoration: none; text-align: center; padding: 1rem;">
+            <i class="fas fa-handshake"></i> Nouvelle Vente
+        </a>
+        <a href="{% url 'manager:export_pdf' %}" class="cyber-btn" style="text-decoration: none; text-align: center; padding: 1rem;">
+            <i class="fas fa-download"></i> Export PDF
+        </a>
+        <a href="{% url 'manager:statistiques' %}" class="cyber-btn" style="text-decoration: none; text-align: center; padding: 1rem;">
+            <i class="fas fa-chart-bar"></i> Statistiques
+        </a>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        
+        <!-- Recent Properties -->
+        <div class="cyber-card">
+            <h3 style="font-family: 'Orbitron', monospace; margin-bottom: 1.5rem; color: var(--primary-neon);">
+                <i class="fas fa-home"></i> Propriétés Récentes
+            </h3>
+            
+            <div style="display: grid; gap: 1rem;">
+                {% for propriete in proprietes_recentes %}
+                <div style="display: flex; align-items: center; padding: 1rem; background: rgba(26, 26, 46, 0.5); border-radius: 8px; border: 1px solid var(--border-glow);">
+                    <div style="flex: 1;">
+                        <h4 style="margin-bottom: 0.5rem;">{{ propriete.titre }}</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">{{ propriete.ville.nom }} • {{ propriete.prix }}€</p>
+                    </div>
+                    <span class="status-badge status-{{ propriete.status.nom|lower }}">
+                        {{ propriete.status.nom }}
+                    </span>
+                </div>
+                {% empty %}
+                <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                    Aucune propriété récente
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Recent Sales -->
+        <div class="cyber-card">
+            <h3 style="font-family: 'Orbitron', monospace; margin-bottom: 1.5rem; color: var(--secondary-neon);">
+                <i class="fas fa-handshake"></i> Ventes Récentes
+            </h3>
+            
+            <div style="display: grid; gap: 1rem;">
+                {% for vente in ventes_recentes %}
+                <div style="display: flex; align-items: center; padding: 1rem; background: rgba(26, 26, 46, 0.5); border-radius: 8px; border: 1px solid var(--border-glow);">
+                    <div style="flex: 1;">
+                        <h4 style="margin-bottom: 0.5rem;">{{ vente.propriete.titre }}</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">{{ vente.client_nom }} • {{ vente.prix_vente }}€</p>
+                    </div>
+                    <div style="text-align: right; color: var(--text-secondary); font-size: 0.8rem;">
+                        {{ vente.date_vente|date:"d/m/Y" }}
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                    Aucune vente récente
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscription - Gestion Immobilière{% endblock %}
+
+{% block auth_content %}
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+    <div class="cyber-card" style="width: 100%; max-width: 500px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 style="font-family: 'Orbitron', monospace; font-weight: 900; font-size: 2rem; margin-bottom: 0.5rem;">
+                <i class="fas fa-user-plus" style="color: var(--primary-neon);"></i>
+                INSCRIPTION
+            </h1>
+            <p style="color: var(--text-secondary);">Créer un nouveau compte</p>
+        </div>
+        
+        {% include 'includes/messages.html' %}
+        
+        <form method="post" class="fade-in">
+            {% csrf_token %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Nom d'utilisateur</label>
+                    {{ form.username }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    {{ form.email }}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Prénom</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nom</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Rôle</label>
+                {{ form.role }}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Mot de passe</label>
+                    {{ form.password1 }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmer mot de passe</label>
+                    {{ form.password2 }}
+                </div>
+            </div>
+            
+            <button type="submit" class="cyber-btn" style="width: 100%; margin-bottom: 1rem;">
+                <i class="fas fa-user-plus"></i> Créer le compte
+            </button>
+            
+            <div style="text-align: center;">
+                <a href="{% url 'auth:login' %}" style="color: var(--secondary-neon); text-decoration: none;">
+                    Déjà un compte ? Se connecter
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

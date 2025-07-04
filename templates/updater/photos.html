@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}Photos - {{ propriete.titre }}{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-camera"></i> Photos - {{ propriete.titre }}
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Retour -->
+    <div style="margin-bottom: 2rem;">
+        <a href="{% url 'updater:proprietes' %}" class="cyber-btn" style="text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Retour aux propriétés
+        </a>
+    </div>
+
+    <!-- Informations de la propriété -->
+    <div class="cyber-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; gap: 2rem; align-items: center;">
+            {% if propriete.image_principale %}
+                <img src="{{ propriete.image_principale }}" alt="{{ propriete.titre }}" 
+                     style="width: 120px; height: 80px; object-fit: cover; border-radius: 10px;">
+            {% else %}
+                <div style="width: 120px; height: 80px; background: var(--bg-dark); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-image" style="font-size: 2rem; color: var(--text-secondary);"></i>
+                </div>
+            {% endif %}
+            
+            <div style="flex: 1;">
+                <h3 style="color: var(--primary-neon); margin-bottom: 0.5rem;">{{ propriete.titre }}</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+                    <i class="fas fa-map-marker-alt"></i> {{ propriete.adresse }}, {{ propriete.ville.nom }}
+                </p>
+                <div style="display: flex; gap: 2rem;">
+                    <span style="color: var(--secondary-neon); font-weight: 600;">{{ propriete.prix|floatformat:0 }}€</span>
+                    <span class="status-badge status-{{ propriete.status.nom|lower }}">{{ propriete.status.nom }}</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; color: var(--primary-neon); font-weight: bold;">{{ images.count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Photos</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone d'upload -->
+    <div class="cyber-card" style="margin-bottom: 2rem;">
+        <h4 style="color: var(--primary-neon); margin-bottom: 1rem;">
+            <i class="fas fa-cloud-upload-alt"></i> Ajouter des Photos
+        </h4>
+        
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+            
+            <div style="border: 2px dashed var(--border-glow); border-radius: 10px; padding: 2rem; text-align: center; margin-bottom: 1rem;" 
+                 id="dropZone">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary-neon); margin-bottom: 1rem;"></i>
+                <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+                    Glissez-déposez vos images ici ou cliquez pour sélectionner
+                </p>
+                <input type="file" id="imageInput" name="image" accept="image/*" multiple style="display: none;">
+                <button type="button" class="cyber-btn" onclick="document.getElementById('imageInput').click()">
+                    <i class="fas fa-folder-open"></i> Choisir des fichiers
+                </button>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ form.legende.label }}</label>
+                    {{ form.legende }}
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 1rem;">
+                    {{ form.is_main }}
+                    <label for="{{ form.is_main.id_for_label }}" style="color: var(--primary-neon);">
+                        {{ form.is_main.label }}
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="cyber-btn" style="width: 100%;">
+                <i class="fas fa-upload"></i> Uploader les Photos
+            </button>
+        </form>
+    </div>
+
+    <!-- Galerie des photos -->
+    <div class="cyber-card">
+        <h4 style="color: var(--primary-neon); margin-bottom: 1.5rem;">
+            <i class="fas fa-images"></i> Galerie Photos
+        </h4>
+        
+        {% if images %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                {% for image in images %}
+                <div class="cyber-card" style="margin: 0; padding: 0; overflow: hidden; position: relative;">
+                    <img src="{{ image.image.url }}" alt="{{ image.legende }}" 
+                         style="width: 100%; height: 150px; object-fit: cover; cursor: pointer;"
+                         onclick="openImageModal('{{ image.image.url }}', '{{ image.legende }}')">
+                    
+                    <!-- Badge principale -->
+                    {% if image.is_main %}
+                        <div style="position: absolute; top: 0.5rem; left: 0.5rem; background: var(--primary-neon); color: var(--bg-dark); padding: 0.25rem 0.5rem; border-radius: 5px; font-size: 0.8rem; font-weight: bold;">
+                            PRINCIPALE
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Actions -->
+                    <div style="position: absolute; top: 0.5rem; right: 0.5rem; display: flex; gap: 0.25rem;">
+                        {% if not image.is_main %}
+                            <button class="cyber-btn" style="padding: 0.25rem; font-size: 0.8rem;" onclick="setMainImage({{ image.id }})">
+                                <i class="fas fa-star"></i>
+                            </button>
+                        {% endif %}
+                        <button class="cyber-btn" style="padding: 0.25rem; font-size: 0.8rem; background: var(--accent-neon);" onclick="deleteImage({{ image.id }})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Légende -->
+                    {% if image.legende %}
+                        <div style="padding: 0.5rem; background: var(--bg-dark); color: var(--text-secondary); font-size: 0.8rem;">
+                            {{ image.legende }}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 3rem;">
+                <i class="fas fa-images" style="font-size: 4rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">Aucune photo</h3>
+                <p style="color: var(--text-secondary);">Ajoutez des photos pour cette propriété</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal d'affichage d'image -->
+<div id="imageModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000;" onclick="closeImageModal()">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%;">
+        <img id="modalImage" style="max-width: 100%; max-height: 100%; border-radius: 10px;">
+        <div id="modalCaption" style="text-align: center; color: white; margin-top: 1rem; font-size: 1.1rem;"></div>
+    </div>
+</div>
+
+<script>
+// Drag & Drop
+const dropZone = document.getElementById('dropZone');
+const imageInput = document.getElementById('imageInput');
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--primary-neon)';
+    dropZone.style.backgroundColor = 'rgba(0, 255, 136, 0.1)';
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'var(--border-glow)';
+    dropZone.style.backgroundColor = 'transparent';
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--border-glow)';
+    dropZone.style.backgroundColor = 'transparent';
+    
+    const files = e.dataTransfer.files;
+    imageInput.files = files;
+});
+
+// Modal d'image
+function openImageModal(src, caption) {
+    document.getElementById('modalImage').src = src;
+    document.getElementById('modalCaption').textContent = caption || '';
+    document.getElementById('imageModal').style.display = 'block';
+}
+
+function closeImageModal() {
+    document.getElementById('imageModal').style.display = 'none';
+}
+
+// Actions sur les images
+function setMainImage(imageId) {
+    if (confirm('Définir cette image comme photo principale ?')) {
+        // Ici, vous feriez un appel AJAX pour définir l'image principale
+        alert('Image définie comme principale');
+        location.reload();
+    }
+}
+
+function deleteImage(imageId) {
+    if (confirm('Supprimer cette image ?')) {
+        // Ici, vous feriez un appel AJAX pour supprimer l'image
+        alert('Image supprimée');
+        location.reload();
+    }
+}
+</script>
+{% endblock %}

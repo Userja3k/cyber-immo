@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Carte des Propriétés{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-map"></i> Carte des Propriétés
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="cyber-card" style="height: 70vh;">
+        <div id="map" style="height: 100%; border-radius: 10px;"></div>
+    </div>
+    
+    <div class="cyber-card" style="margin-top: 1rem;">
+        <h4 style="margin-bottom: 1rem; font-family: 'Orbitron', monospace; color: var(--primary-neon);">
+            <i class="fas fa-info-circle"></i> Légende
+        </h4>
+        <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 20px; height: 20px; background: var(--primary-neon); border-radius: 50%;"></div>
+                <span>Disponible</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 20px; height: 20px; background: var(--accent-neon); border-radius: 50%;"></div>
+                <span>Vendu</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 20px; height: 20px; background: var(--secondary-neon); border-radius: 50%;"></div>
+                <span>En Location</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize map
+    const map = L.map('map').setView([0.3476, 32.5825], 10);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Properties data from Django
+    const proprietes = {{ proprietes_data|safe }};
+    
+    // Add markers for each property
+    proprietes.forEach(function(propriete) {
+        const marker = L.circleMarker([propriete.latitude, propriete.longitude], {
+            radius: 8,
+            fillColor: propriete.couleur || '#00ff88',
+            color: '#ffffff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map);
+        
+        // Popup content
+        const popupContent = `
+            <div style="color: #000; font-family: 'Exo 2', sans-serif;">
+                <h4 style="margin-bottom: 0.5rem; color: #1a1a2e;">${propriete.titre}</h4>
+                <p style="margin-bottom: 0.5rem; color: #666;"><strong>Prix:</strong> ${propriete.prix}€</p>
+                <p style="margin-bottom: 0.5rem; color: #666;"><strong>Statut:</strong> ${propriete.status}</p>
+                ${propriete.image ? `<img src="${propriete.image}" style="width: 100%; max-width: 200px; height: 100px; object-fit: cover; border-radius: 5px; margin-top: 0.5rem;">` : ''}
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent);
+    });
+    
+    // Fit map to show all markers
+    if (proprietes.length > 0) {
+        const group = new L.featureGroup(map.eachLayer(function(layer) {
+            return layer;
+        }));
+        map.fitBounds(group.getBounds().pad(0.1));
+    }
+});
+</script>
+{% endblock %}

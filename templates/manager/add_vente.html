@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Nouvelle Vente{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-handshake"></i> Nouvelle Vente
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="cyber-card" style="max-width: 800px; margin: 0 auto;">
+        <h3 style="font-family: 'Orbitron', monospace; margin-bottom: 2rem; color: var(--primary-neon);">
+            <i class="fas fa-file-invoice-dollar"></i> Enregistrer une Vente
+        </h3>
+        
+        <form method="post" id="venteForm">
+            {% csrf_token %}
+            
+            <!-- Sélection de la propriété -->
+            <div class="form-group">
+                <label class="form-label">{{ form.propriete.label }}</label>
+                {{ form.propriete }}
+            </div>
+            
+            <!-- Informations client -->
+            <h4 style="color: var(--secondary-neon); margin: 2rem 0 1rem 0;">
+                <i class="fas fa-user"></i> Informations Client
+            </h4>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ form.client_nom.label }}</label>
+                    {{ form.client_nom }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ form.client_telephone.label }}</label>
+                    {{ form.client_telephone }}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ form.client_email.label }}</label>
+                    {{ form.client_email }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ form.client_identite.label }}</label>
+                    {{ form.client_identite }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">{{ form.client_adresse.label }}</label>
+                {{ form.client_adresse }}
+            </div>
+            
+            <!-- Informations financières -->
+            <h4 style="color: var(--secondary-neon); margin: 2rem 0 1rem 0;">
+                <i class="fas fa-euro-sign"></i> Informations Financières
+            </h4>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ form.prix_vente.label }}</label>
+                    {{ form.prix_vente }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ form.mode_paiement.label }}</label>
+                    {{ form.mode_paiement }}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ form.frais_supplementaires.label }}</label>
+                    {{ form.frais_supplementaires }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ form.remise.label }}</label>
+                    {{ form.remise }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">{{ form.date_vente.label }}</label>
+                {{ form.date_vente }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">{{ form.notes.label }}</label>
+                {{ form.notes }}
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="button" class="cyber-btn" style="flex: 1;" onclick="confirmVente()">
+                    <i class="fas fa-handshake"></i> Finaliser la Vente
+                </button>
+                <a href="{% url 'manager:ventes' %}" class="cyber-btn" style="background: var(--text-secondary); flex: 1; text-align: center; text-decoration: none;">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de confirmation -->
+<div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background: var(--bg-card); border-radius: 15px; padding: 2rem;">
+        <h3 style="margin-bottom: 1rem; color: var(--warning-neon);">
+            <i class="fas fa-shield-alt"></i> Confirmation Sécurisée
+        </h3>
+        <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+            Veuillez entrer votre mot de passe pour confirmer cette vente :
+        </p>
+        <input type="password" id="passwordConfirm" class="cyber-input" placeholder="Mot de passe" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; gap: 1rem;">
+            <button class="cyber-btn" onclick="submitVente()" style="flex: 1;">
+                <i class="fas fa-check"></i> Confirmer
+            </button>
+            <button class="cyber-btn" onclick="closeConfirmModal()" style="background: var(--text-secondary); flex: 1;">
+                <i class="fas fa-times"></i> Annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmVente() {
+    // Vérifier que tous les champs requis sont remplis
+    const form = document.getElementById('venteForm');
+    const requiredFields = form.querySelectorAll('[required]');
+    let allFilled = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            allFilled = false;
+            field.style.borderColor = 'var(--accent-neon)';
+        } else {
+            field.style.borderColor = 'var(--border-glow)';
+        }
+    });
+    
+    if (!allFilled) {
+        alert('Veuillez remplir tous les champs obligatoires');
+        return;
+    }
+    
+    document.getElementById('confirmModal').style.display = 'block';
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    document.getElementById('passwordConfirm').value = '';
+}
+
+async function submitVente() {
+    const password = document.getElementById('passwordConfirm').value;
+    
+    if (!password) {
+        alert('Veuillez entrer votre mot de passe');
+        return;
+    }
+    
+    // Vérifier le mot de passe via AJAX
+    try {
+        const response = await fetch('/api/verif-user/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                password: password
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.valid) {
+            document.getElementById('venteForm').submit();
+        } else {
+            alert('Mot de passe incorrect');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur de vérification');
+    }
+}
+</script>
+{% endblock %}

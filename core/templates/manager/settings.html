@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Paramètres - Gestion Immobilière{% endblock %}
+
+{% block content %}
+<h1>Paramètres du manager</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div>
+        <label for="theme">Thème:</label>
+        <input type="text" id="theme" name="theme" value="{{ settings.theme|default:'' }}">
+    </div>
+
+    <div>
+        <label for="langue">Langue:</label>
+        <input type="text" id="langue" name="langue" value="{{ request.user.langue|default:'' }}">
+    </div>
+
+    <div>
+        <label for="auto_logout">Auto déconnexion (minutes):</label>
+        <input type="number" id="auto_logout" name="auto_logout" value="{{ request.user.auto_logout|default:10 }}" min="1" max="60">
+    </div>
+
+    <button type="submit">Enregistrer</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,22 @@
+{% load static %}
+
+<div class="header">
+    <div class="header-title">
+        {% block page_title %}Dashboard{% endblock %}
+    </div>
+    
+    <div class="header-actions">
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i>
+        </div>
+        
+        <div class="user-info">
+            <span>{{ user.first_name|default:user.username }}</span>
+            <i class="fas fa-user-circle" style="margin-left: 0.5rem; font-size: 1.5rem;"></i>
+        </div>
+        
+        <button class="cyber-btn d-md-none" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</div>

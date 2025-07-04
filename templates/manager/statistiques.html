@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Statistiques{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-chart-bar"></i> Statistiques et Analyses
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Actions -->
+    <div class="cyber-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: 'Orbitron', monospace; color: var(--primary-neon); margin: 0;">
+                <i class="fas fa-analytics"></i> Tableau de Bord Analytique
+            </h3>
+            <button class="cyber-btn" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimer
+            </button>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+        <!-- Revenus mensuels -->
+        <div class="cyber-card">
+            <h4 style="color: var(--primary-neon); margin-bottom: 1rem;">
+                <i class="fas fa-chart-line"></i> Revenus Mensuels
+            </h4>
+            <canvas id="revenusChart" style="max-height: 300px;"></canvas>
+        </div>
+        
+        <!-- Répartition des statuts -->
+        <div class="cyber-card">
+            <h4 style="color: var(--secondary-neon); margin-bottom: 1rem;">
+                <i class="fas fa-chart-pie"></i> Répartition des Propriétés
+            </h4>
+            <canvas id="statutsChart" style="max-height: 300px;"></canvas>
+        </div>
+    </div>
+
+    <!-- Statistiques par statut -->
+    <div class="cyber-card">
+        <h4 style="color: var(--primary-neon); margin-bottom: 1.5rem;">
+            <i class="fas fa-list"></i> Détails par Statut
+        </h4>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            {% for stat in stats_statut %}
+            <div class="stat-card" style="border-left: 4px solid {{ stat.status__couleur }};">
+                <div class="stat-number">{{ stat.count }}</div>
+                <div class="stat-label">{{ stat.status__nom }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Configuration des couleurs
+const colors = {
+    primary: '#00ff88',
+    secondary: '#00d4ff',
+    accent: '#ff006e',
+    warning: '#ff5722'
+};
+
+// Graphique des revenus
+const revenusData = {{ ventes_par_mois|safe }};
+const revenusCtx = document.getElementById('revenusChart').getContext('2d');
+new Chart(revenusCtx, {
+    type: 'line',
+    data: {
+        labels: revenusData.map(item => item.mois),
+        datasets: [{
+            label: 'Revenus (€)',
+            data: revenusData.map(item => item.revenus),
+            borderColor: colors.primary,
+            backgroundColor: colors.primary + '20',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#ffffff'
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: '#ffffff',
+                    callback: function(value) {
+                        return value.toLocaleString() + '€';
+                    }
+                },
+                grid: {
+                    color: '#ffffff20'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#ffffff'
+                },
+                grid: {
+                    color: '#ffffff20'
+                }
+            }
+        }
+    }
+});
+
+// Graphique circulaire des statuts
+const statutsData = {{ stats_statut|safe }};
+const statutsCtx = document.getElementById('statutsChart').getContext('2d');
+new Chart(statutsCtx, {
+    type: 'doughnut',
+    data: {
+        labels: statutsData.map(item => item.status__nom),
+        datasets: [{
+            data: statutsData.map(item => item.count),
+            backgroundColor: statutsData.map(item => item.status__couleur),
+            borderColor: '#ffffff',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#ffffff',
+                    padding: 20
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

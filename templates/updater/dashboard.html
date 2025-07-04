@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Photo Updater{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-camera"></i> Dashboard Photo Updater
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_mes_proprietes }}</div>
+            <div class="stat-label">Mes Propriétés</div>
+            <i class="fas fa-home" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; color: var(--primary-neon); opacity: 0.3;"></i>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ mes_photos }}</div>
+            <div class="stat-label">Photos Uploadées</div>
+            <i class="fas fa-camera" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; color: var(--secondary-neon); opacity: 0.3;"></i>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ mes_proprietes|length }}</div>
+            <div class="stat-label">Récemment Ajoutées</div>
+            <i class="fas fa-plus" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; color: var(--warning-neon); opacity: 0.3;"></i>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Disponibilité</div>
+            <i class="fas fa-check-circle" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; color: var(--accent-neon); opacity: 0.3;"></i>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <a href="{% url 'updater:add_propriete' %}" class="cyber-btn" style="text-decoration: none; text-align: center; padding: 1rem;">
+            <i class="fas fa-plus"></i> Ajouter Propriété
+        </a>
+        <a href="{% url 'updater:proprietes' %}" class="cyber-btn" style="text-decoration: none; text-align: center; padding: 1rem;">
+            <i class="fas fa-list"></i> Toutes les Propriétés
+        </a>
+        <a href="{% url 'updater:carte' %}" class="cyber-btn" style="text-decoration: none; text-align: center; padding: 1rem;">
+            <i class="fas fa-map"></i> Voir sur Carte
+        </a>
+        <a href="{% url 'updater:feed' %}" class="cyber-btn" style="text-decoration: none; text-align: center; padding: 1rem;">
+            <i class="fas fa-envelope"></i> Messages
+        </a>
+    </div>
+    
+    <!-- My Recent Properties -->
+    <div class="cyber-card">
+        <h3 style="font-family: 'Orbitron', monospace; margin-bottom: 1.5rem; color: var(--primary-neon);">
+            <i class="fas fa-home"></i> Mes Propriétés Récentes
+        </h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            {% for propriete in mes_proprietes %}
+            <div class="cyber-card" style="margin: 0; position: relative; overflow: hidden;">
+                {% if propriete.image_principale %}
+                <div style="height: 200px; background-image: url('{{ propriete.image_principale }}'); background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 1rem;"></div>
+                {% else %}
+                <div style="height: 200px; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 1rem;">
+                    <i class="fas fa-image" style="font-size: 3rem; color: var(--text-secondary);"></i>
+                </div>
+                {% endif %}
+                
+                <h4 style="margin-bottom: 0.5rem;">{{ propriete.titre }}</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">{{ propriete.ville.nom }} • {{ propriete.prix }}€</p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="status-badge status-{{ propriete.status.nom|lower }}">
+                        {{ propriete.status.nom }}
+                    </span>
+                    <a href="{% url 'updater:photos' propriete.pk %}" class="cyber-btn" style="font-size: 0.8rem; padding: 8px 16px; text-decoration: none;">
+                        <i class="fas fa-camera"></i> Photos
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <i class="fas fa-home" style="font-size: 4rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">Aucune propriété</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Commencez par ajouter votre première propriété</p>
+                <a href="{% url 'updater:add_propriete' %}" class="cyber-btn">
+                    <i class="fas fa-plus"></i> Ajouter une Propriété
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

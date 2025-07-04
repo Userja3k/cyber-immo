@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Propriétés - Gestion Immobilière{% endblock %}
+
+{% block content %}
+<h1>Liste des propriétés</h1>
+
+<form method="get" class="filters">
+    <label for="status">Statut:</label>
+    <select name="status" id="status" onchange="this.form.submit()">
+        <option value="">Tous</option>
+        {% for status in statuses %}
+            <option value="{{ status.id }}" {% if status.id|stringformat:"s" == current_status %}selected{% endif %}>{{ status.nom }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="ville">Ville:</label>
+    <select name="ville" id="ville" onchange="this.form.submit()">
+        <option value="">Toutes</option>
+        {% for ville in villes %}
+            <option value="{{ ville.id }}" {% if ville.id|stringformat:"s" == current_ville %}selected{% endif %}>{{ ville.nom }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Titre</th>
+            <th>Ville</th>
+            <th>Statut</th>
+            <th>Agent</th>
+            <th>Prix</th>
+            <th>Date de création</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for propriete in proprietes %}
+        <tr>
+            <td>{{ propriete.titre }}</td>
+            <td>{{ propriete.ville.nom }}</td>
+            <td>{{ propriete.status.nom }}</td>
+            <td>{{ propriete.agent.username }}</td>
+            <td>{{ propriete.prix }}</td>
+            <td>{{ propriete.created_at|date:"d/m/Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Aucune propriété trouvée.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
